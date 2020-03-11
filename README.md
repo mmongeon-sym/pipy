@@ -19,8 +19,10 @@ Pipy() provides an accessible Python API which follows the recommendation to use
         `subprocess`
 
 ## Install
+
+#### Install from Github
 ```bash
-pip install pipy
+pip install https://github.com/mmongeon-sym/pipy/releases/latest/download/pipy.tar.gz
 ```
 
 ## Usage
