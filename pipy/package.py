@@ -24,11 +24,14 @@ class PackageHelper(object):
 
     @classmethod
     def is_installed(cls, name):
-        pkg = pkgutil.find_loader(name)
-        if pkg is not None and pkg.name == name:
-            return True
-        else:
+        try:
+            pkg = pkg_resources.get_distribution(dist=name)
+            if pkg.key is not None and pkg.location is not None:
+                if os.path.exists(os.path.join(pkg.location, pkg.key)) is True:
+                    return True
+        except DistributionNotFound as e:
             return False
+
 
     @classmethod
     def search_pypi(cls, name):
@@ -139,12 +142,13 @@ class PackageHelper(object):
     def get_version(cls, name):
         try:
             pkg = pkg_resources.get_distribution(dist=name)
+            if pkg.key is not None and pkg.location is not None:
+                if os.path.exists(os.path.join(pkg.location, pkg.key)) is True:
+                    if pkg is not None:
+                        if hasattr(pkg, 'version') and getattr(pkg, 'version') is not None:
+                            return getattr(pkg, 'version')
         except DistributionNotFound as e:
             pkg = None
-
-        if pkg is not None:
-            if hasattr(pkg, 'version') and getattr(pkg, 'version') is not None:
-                return getattr(pkg, 'version')
         return None
 
     @classmethod
