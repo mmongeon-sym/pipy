@@ -38,11 +38,12 @@ class PackageHelper(object):
         # cls.log.info(f"Searching PyPi for Package({name}) ...")
         args = ['pip', 'search', name]
         cmd = Process(args=args, timeout=30, shell=False)
-        cmd.run(raise_exception=True)
-
+        cmd.run(raise_exception=False)
         results = []
 
         result_idx = 0
+        if cmd.status_code > 0:
+            return []
         for idx, item in enumerate(cmd.stdout_lines):
             matches = RE_SEARCH_RESULT.match(item)
             if matches is not None:
@@ -83,7 +84,15 @@ class PackageHelper(object):
         return results
 
     @classmethod
-    def get_pypi(cls, name):
+    def get_pypi(cls, name: str):
+        """
+        Search PyPi package repository for a package by `name`. Only return if the package exists on PyPi.
+
+        Args:
+            name(:obj:`str`, required): package name
+        Returns:
+            obj:`PyPiPackage`
+        """
         cls.log.info(f"Searching PyPi for Package({name}) ...")
         results = cls.search_pypi(name)
         if results is not None and len(results) > 0:
@@ -94,7 +103,21 @@ class PackageHelper(object):
         return None
 
     @classmethod
-    def get_package(cls, name):
+    def get_package(cls, name: str):
+        """
+        Return a `Package` object for the provided package `name`
+
+        See Also
+              `pip uninstall`: https://pip.pypa.io/en/stable/reference/pip_search
+
+        Args:
+            name(:obj:`str`, required): package name
+
+
+        Returns:
+            obj:`Package`
+
+        """
         pkg = Package(name=name)
         return pkg
 
@@ -542,6 +565,8 @@ class InstalledPackage(PackageClassMethods, DataClass):
     Dataclass which represents an installed package
 
     Represents the results returned from `pip show`
+
+
 
     Parameters
         name(:obj:`str`, required): Package name

@@ -4,8 +4,6 @@ from .package import Package
 
 class Pipy(object):
     """
-    Pipy
-
     A native Python wrapper around the command line program: `pip`
 
     Pipy provides a high-level API to `pip` commands executed using a wrapper around a Python `subprocess`.
@@ -14,7 +12,7 @@ class Pipy(object):
     the input and output involved when communicating with `pip`
 
     Usage
-        :class:`Pipy()`: Abstract API around the command line program `pip`.
+        :class:`Pipy()`: A native Python wrapper around the command line program: `pip`
             Examples:
                 Pipy.install('boxsdk')
         :class: `Package(name)`: Python object representing a python package.
@@ -113,7 +111,8 @@ class Pipy(object):
     @classmethod
     def show(cls, name: str, fast: bool = True):
         """
-        Return information about an installed package
+        Get information about a package. Returns a `Package` object with attrs: name, installed, version. ie. `pip show`
+
 
         See Also
             `pip show`: https://pip.pypa.io/en/stable/reference/pip_show
@@ -135,7 +134,7 @@ class Pipy(object):
     @classmethod
     def install(cls, name: str, no_dependencies=True):
         """
-        Install a package by pypi name only if the package is not already installed.
+        Install a `PyPiPackage` by `name`, without dependencies, and only if not installed already. Will not upgrade any packages
 
         By default, no extra dependencies are installed or updated as a safeguard
 
@@ -155,7 +154,7 @@ class Pipy(object):
     @classmethod
     def uninstall(cls, name: str):
         """
-        Uninstall a package by name only if the package is  already installed.
+        Uninstall a package by `name`,  only if the package is currently installed.
 
 
         See Also
@@ -173,8 +172,7 @@ class Pipy(object):
     @classmethod
     def search(cls, name: str):
         """
-        Search PyPi package repository for a package by name
-
+        Search PyPi package for a package by `name`. Return a list of `PyPiPackage` search results
 
         See Also
               `pip uninstall`: https://pip.pypa.io/en/stable/reference/pip_search
@@ -192,37 +190,50 @@ class Pipy(object):
     @classmethod
     def get_package(cls, name: str):
         """
-         Search PyPi package repository for a package by name, only return the package if the name matches exactly
+        Return a `Package` object for the provided package `name`
 
-         See Also
-               `pip uninstall`: https://pip.pypa.io/en/stable/reference/pip_search
+         Args:
+             name(:obj:`str`, required): package name
+
+         Returns:
+             obj:`Package`
+
+         """
+        return PackageHelper.get_package(name=name)
+
+    @classmethod
+    def get_pypi_package(cls, name: str):
+        """
+        Return a `PyPiPackage` object for the provided package `name` only if the package exists on PyPi
 
          Args:
              name(:obj:`str`, required): package name
 
 
          Returns:
-             obj:`Package`
+             obj:`PyPiPackage`
 
          """
         return PackageHelper.get_pypi(name=name)
+
+
 
     @classmethod
     def is_available(cls, name: str):
         """
         Returns True/False if the package is available on PyPi to be installed
 
-       See Also
-            :method:`Pipy.get_package`
+        See Also
+            :method:`Pipy.get_pypi_package`
             `pip search`: https://pip.pypa.io/en/stable/reference/pip_search
 
-       Args:
+        Args:
            name(:obj:`str`, required): package name
 
-       Returns:
+        Returns:
            obj:`bool`: True if the package is available on PyPi
 
-       """
+        """
         pkg = PackageHelper.get_pypi(name=name)
         if pkg is not None:
             return pkg
@@ -233,17 +244,18 @@ class Pipy(object):
         """
         Returns True/False if the package is installed
 
-       See Also
-            :method:`Pipy.get_package`
+        See Also
+            :method:`Pipy.get_pypi_package`
 
-       Args:
+        Args:
            name(:obj:`str`, required): package name
 
-       Returns:
+        Returns:
            obj:`bool`: True if the package is installed
 
-       """
+        """
         pkg = cls.get_package(name=name)
         if pkg is not None and pkg.installed is True:
             return True
         return False
+
